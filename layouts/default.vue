@@ -1,25 +1,7 @@
-<!-- layouts/default.vue -->
 <template>
-    <div>
-      <Header />
+  <Header />
+    <div class="px-12 py-6">
       <slot />
-      <Footer />
     </div>
+    <Footer />
   </template>
-  
-  <script>
-  import Header from '~/components/header.vue'
-  import Footer from '~/components/footer.vue'
-  
-  export default {
-    components: {
-      Header,
-      Footer,
-    },
-  }
-  </script>
-  
-  <style>
-  
-  </style>
-  

@@ -1,33 +1,25 @@
-<!-- components/Header.vue -->
 <template>
-    <header class="header">
-      <nav>
-        <h1>MBKM</h1>
-        <ul>
-          <li><nuxt-link to="/">beranda</nuxt-link></li>
-          <li><nuxt-link to="/about">daftar peserta</nuxt-link></li>
-          <li><nuxt-link to="/contact">hasil nilai</nuxt-link></li>
+    <header class="flex flex-row justify-between items-center px-12 py-3 bg-slate-500 text-white">
+        <h1>logo</h1>
+        <ul class="flex flex-row items-center gap-4">
+          <li>
+           <NuxtLink to="/">
+            Home
+           </NuxtLink>
+          </li>
+
+          <li>
+           <NuxtLink to="/about">
+            about
+           </NuxtLink>
+          </li>
+
+           <li>
+           <NuxtLink to="/profile">
+            profile
+           </NuxtLink>
+          </li>
         </ul>
-      </nav>
     </header>
   </template>
-  
-  <script>
-  export default {
-    name: 'Header',
-  }
-  </script>
-  
-  <style scoped>
-  .header {
-    background-color: #333;
-    color: white;
-    padding: 1rem;
-  }
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-  }
-  </style>
   
