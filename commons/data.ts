@@ -14,6 +14,14 @@ export const products =[
         price: 'RP5.000',
         stock: 100,
         description:'iki sepatu wedok',
+    },
+    {
+        id:3,
+        image: 'https://down-id.img.susercontent.com/file/id-11134207-7r98y-ll994ccc9v2cae.webp',
+        title: 'sepatu campurk',
+        price: 'RP5.000',
+        stock: 100,
+        description:'iki sepatu sembarang',
     }
 
 ]
