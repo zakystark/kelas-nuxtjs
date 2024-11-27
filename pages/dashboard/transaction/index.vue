@@ -1,9 +1,11 @@
 <script setup lang="ts">
 const router = useRouter()
+
 const onClickCreateTransaction = () => {
   router.push('/dashboard/transaction/create')
 }
 </script>
+
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-row justify-between">
@@ -15,6 +17,7 @@ const onClickCreateTransaction = () => {
         Tambah Transaksi
       </button>
     </div>
+
     <table class="w-full border-2">
       <thead class="border-b-2">
         <tr>
@@ -55,4 +58,6 @@ const onClickCreateTransaction = () => {
       </tbody>
     </table>
   </div>
+
+
 </template>

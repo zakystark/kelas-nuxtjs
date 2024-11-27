@@ -1,46 +1,191 @@
-<script lang="ts" setup>
-const router = useRouter()
-const onClickCancel = () => {
-  console.log("Pindah ke halaman sebelumnya");
-  router.back()
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import Index from '../index.vue';
+
+const client = useSupabaseClient()
+const user = useSupabaseUser()
+
+const products = ref([])
+
+const selectedProduct = ref(null)
+const quantity = ref(1)
+const transactionItems = ref([])
+
+const  totalPrice = computed(() => {
+return selectedProduct.value
+? selectedProduct.value.price * quantity.value
+   : 0
+})
+
+const transactionTotal = computed(() => {
+  return transactionItems.value.reduce((total, item) =>
+  total + (item.product.price * item.quantity), 0)
+})
+
+const addTransactionItem = () => {
+  if (selectedProduct.value && quantity.value > 0) {
+    transactionItems.value.push({
+      product: selectedProduct.value,
+      quantity: quantity.value
+    })
+
+    selectedProduct.value = null
+    quantity.value = 1
+  }
 }
+
+const removeTransactionItem = (Index) => {
+  transactionItems.value.splice(index, 1)
+}
+
+const saveTransaction = async () => {
+  if (transactionItems.value.length > 0) {
+    let transactionPayloads = []
+
+    transactionItems.value.forEach((item) => {
+
+      transactionPayloads.push({
+        user: user.value.id,
+        product: item.product.id,
+        qty_product: item.quantity,
+        total_price: item.product.price * item.quantity
+      })
+
+    });
+
+    console.log('Saving transaction:', transactionPayloads)
+
+    const { data, error } = await client
+    .from('transaction')
+    .insert(transactionPayloads)
+    .select()
+
+    if (data) {
+      alert('Transaction saved successfully!', data)
+    } else {
+      alert('Failed saving transactions', error)
+    }
+
+    transactionItems.value = []
+    } else {
+      alert('No items in transaction')
+    }
+  }
+
+  onMounted(async () => {
+    try {
+      const { data } = await client.from('product').select().order('created_at', { ascending: true})
+
+      return products.value = data
+    } catch (error) {
+      console.error('Failed to fetch products', error)
+    }
+  })
+
 </script>
+
 <template>
-  <div class="flex flex-col gap-4">
-    <h1 class="text-2xl font-semibold">
-      Tambah Transaksi
-    </h1>
-    <form action="#">
-      <div class="flex flex-col gap-2">
-        <input
-          class="p-2 border-2 border-slate-400 rounded-md" 
-          placeholder="Id transaksi" 
-          type="text"
-        >
-        
-        <textarea
-          class="p-2 border-2 border-slate-400 rounded-md" 
-          placeholder="Daftar belanjaan" 
-          type="text"
-        ></textarea>
-        <input
-          class="w-full p-2 border-2 border-slate-400 rounded-md" 
-          placeholder="Total harga" 
-          type="number"
-        >
-        <div class="flex flex-row gap-2 items-center">
-          <button 
-            type="button" 
-            class="w-fit border-2 border-blue-500 text-blue-500 p-2 rounded-lg px-4" 
-            @click="onClickCancel"
+  <div class="p-4">
+    <h2 class="text-x1 font-bold mb-4">
+      Create Transaction
+    </h2>
+
+    <form @submit.prevent="addTransactionItem" class="mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block mb-2">Select product</label>
+          <select
+            v-model="selectedProduct" 
+            class="w-full p-2 border rounded"
+            required
           >
-            Batal
-          </button>
-          <button type="button" class="w-fit bg-blue-500 text-white p-2 rounded-lg px-4">
-            Simpan Transaksi
+          <option value="" disabled>
+            choose a product
+          </option>
+          <option 
+          v-for="product in products"
+          :key="product.id"
+          :value="product"
+          >
+          {{ product.title }} - Rp{{ product.price }}
+        </option>
+          </select>
+                </div>
+
+        <div>
+          <label class="block mb-2">quantity</label>
+          <input
+             type="number"
+             v-model.number="quantity"
+             min="1"
+             class="w-full p-2 border rounded"
+             required
+             />
+        </div>
+          
+          <div>
+            <label class="block mb-2">Total price</label>
+            <input
+              :type="Text"
+              :value="totalPrice"
+              class="w-full p-2 border rounded bg-gray-100" 
+              readonly
+            >
+          </div>
+        </div>
+
+        <button
+        type="submit"
+        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+        add to Transaction
+      </button>
+      </form>
+
+        <div v-if="transactionItems.length" class="mt-6">
+         <h3 class="text-lg font-semibold mb-3">Transaction items</h3>
+          <table class="w-full border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="p-2 border">product</th>
+                <th class="p-2 border">quantity</th>
+                <th class="p-2 border">Unit price</th>
+                <th class="p-2 border">Total</th>
+                <th class="p-2 border">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+              v-for="(item, index) in transactionItems"
+              :key="index"
+              class="text-center"
+              >
+              <th class="p-2 border">{{ item.product.title }}</th>
+              <th class="p-2 border">{{ item.quantity }}</th>
+              <th class="p-2 border">{{ item.product.price }}</th>
+              <th class="p-2 border">{{ item.product.price * item.quantity }}</th>
+              <td class="p-2 border">
+                <button
+                @click="removeTransactionItem(index)"
+                class="text-red-500 hover:text-red-700"
+                >
+                Remove
+              </button>
+              </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="mt-4 text-right font-bold">
+            Transaction Total: Rp{{  transactionTotal }}
+          </div>
+
+          <button
+          @click="saveTransaction"
+          class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+          Save Transaction
           </button>
         </div>
       </div>
-    </form>
-  </div>
 </template>
